@@ -1,69 +1,42 @@
-import json
-import urllib2
+import argparse
 
-def load_city_list(data_file):
-    with open(data_file, 'r') as city_list:
-        data = [json.loads(line) for line in city_list]
-        city_list.close()
-    return data
+from config import global_settings
+from utils.api_utils import get_api_data
+from utils.data_utils import data_organizer, weather_reporter
 
+class CurrentWeather(object):
+    user_api = global_settings.get('user_api')
+    api_main = global_settings.get('api_main')
 
-def get_city_info(name, data_file='/Users/pjhuang/dev/utils/api_openweathermap/city.list.us.json'):  # need to revise
-    # load raw city list file
+    def __init__(self, city_name, unit='imperial', output_type='dict'):
+        self.city_name = city_name
+        self.unit = unit
+        self.output_type = output_type
 
-    try:
-        city_list = load_city_list(data_file)
-    except IOError as e:
-        return 'I/O error({0}): city list file is not does exist. Please double check your path and file name.'.format(
-            e.errno)
+    def get_api_url(self):
+        city_name = self.city_name.replace(' ', '%20')
+        mode = 'json'
+        api_url = "{}q={}&units={}&mode={}&appid={}".format(self.api_main, city_name, self.unit, mode, self.user_api)
+        return api_url
 
-    # get city information
-    city_info = [d for d in city_list if d['name'] == name]
-    if len(city_info) == 0:
-        print 'The city is not in the API database. Please double check the spelling or use another city name.'
-        return None
-    elif len(city_info) > 1:
-        print 'Duplicated city name. Returning the first one in the list'
+    def get_data(self):
+        return get_api_data(self.get_api_url())
 
-    return city_info[0]
+    def get_weather(self):
+        return data_organizer(self.get_data(), self.output_type)
 
-print get_city_info('San Francisco')
+    def report_weather(self):
+        weather_dict = data_organizer(self.get_data(), 'dict')
+        return weather_reporter(weather_dict)
 
-city_info = get_city_info('San Francisco')
+if __name__ == '__main__':
 
-city_id = city_info.get('_id')
+    parser = argparse.ArgumentParser(description='Generate weather report from Openweathermap API')
+    parser.add_argument('city_name', nargs='?', type=str, default='san francisco')
+    parser.add_argument('unit', nargs='?', type=str, default='imperial')
+    parser.add_argument('output_type', nargs='?', type=str, default='dict')
 
-user_api = 'c50af3f535984f1f53b97c5bdc514d53'
-unit = 'metric'
-api_main = 'http://api.openweathermap.org/data/2.5/weather?'
+    args = parser.parse_args()
 
-def get_full_api_url(city_name, unit = 'imperial'):
-    city_name = city_name.replace(' ', '%20')
-    mode = 'json'
-#     full_api_url = api_main + 'q=' + city_name + '&units=' + unit + '&mode=' mode + '&appid=' + user_api
-    full_api_url = "{}q={}&units={}&mode={}&appid={}".format(api_main, city_name, unit, mode, user_api)
-    return full_api_url
-
-print get_full_api_url('San Francisco')
-
-api_url = get_full_api_url('San Francisco')
-
-def get_current_weather(api_url):
-    json_file = urllib2.urlopen(api_url)
-    api_data = json.load(json_file)
-    return api_data
-
-print get_current_weather(api_url)
-
-
-api_data = get_current_weather(api_url)
-
-def output_data(api_data):
-    print '-----------------------------'
-    print 'Current weather in: {0}'.format(api_data['name'])
-    print api_data['main']['temp'], api_data['weather'][0]['main']
-    print 'Max: {}, Min: {}'.format(api_data['main']['temp_max'], api_data['main']['temp_min'])
-    print '-----------------------------'
-    return None
-
-print output_data(api_data)
+    city_weather = CurrentWeather(args.city_name, args.unit, args.output_type)
+    print city_weather.report_weather()
