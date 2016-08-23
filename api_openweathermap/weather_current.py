@@ -33,7 +33,7 @@ class CurrentWeather(object):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Generate weather report from Openweathermap API')
-    parser.add_argument('city_name', nargs='?', type=str, default='san francisco')
+    parser.add_argument('city_name', nargs='?', type=str, default='san francisco, us')
     parser.add_argument('unit', nargs='?', type=str, default='imperial')
     parser.add_argument('output_type', nargs='?', type=str, default='dict')
 
