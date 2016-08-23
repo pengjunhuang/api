@@ -52,19 +52,19 @@ def data_organizer(api_data, type = 'dict'):
         return output_dict
 
 def weather_reporter(data):
+    # TODO:Hardcoded units
+
     data['m_symbol'] = u'\xb0'.encode('utf8') + 'F'
     s = '''
         ---------------------------------------
         Current weather in: {city}, {country}:
-        Temperature: {temp}{m_symbol} {sky}
+        {temp}{m_symbol}  {sky}
+        Min: {temp_min}{m_symbol}, Max: {temp_max}{m_symbol}
 
-        Temperature:
-        Max: {temp_max}, Min: {temp_min}
-
-        Wind Speed: {wind_speed}, Degree: {wind_degree}
+        Wind Speed: {wind_speed}mph, Degree: {wind_degree}
         Humidity: {humidity}
-        Cloud: {cloudiness}
-        Pressure: {pressure}
+        Cloudiness: {cloudiness}%
+        Pressure: {pressure}hPa
         Sunrise at: {sunrise}
         Sunset at: {sunset}
 
