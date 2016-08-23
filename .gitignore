@@ -58,3 +58,4 @@ Thumbs.db
 *.text
 .Rproj.user
 .xml
+.ipynb_checkpoints/

@@ -31,3 +31,4 @@ def get_city_info(name, data_file='/Users/pjhuang/dev/utils/api_openweathermap/c
 
     return city_info[0]
 
+print get_city_info('San Francisco')
