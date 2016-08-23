@@ -1,3 +1,4 @@
+#!/anaconda2/bin/python
 import argparse
 
 from config import global_settings

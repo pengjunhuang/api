@@ -1,0 +1,4 @@
+EMAILS="huangpj1110@gmail.com"
+PYTHONPATH=/anaconda2/bin/python
+
+* * * * * python ~/dev/api/api_openweathermap/weather_current.py > ~/log/weather_current.log 2>&1; cat ~/log/wcroneather_current.log | mail -s "Weather Report cron output" "$EMAILS"
