@@ -1,4 +1,3 @@
-#!/anaconda2/bin/python
 import argparse
 
 from config import global_settings
@@ -9,10 +8,23 @@ class CurrentWeather(object):
     user_api = global_settings.get('user_api')
     api_main = global_settings.get('api_main')
 
-    def __init__(self, city_name, unit='imperial', output_type='dict'):
+    def __init__(self, city_name, unit='imperial', output_type='dict', timezone='America/Los_Angeles', offset=0):
+        """
+
+        :param city name, e.g. sanfrancisco,us
+        :param unit, imperial for Fahrenheit, metric for Celsius, default is Kelvin
+        :param output_type: choices of dict and pd (or pandas)
+        :param timezone time zone default is America/Los_Angeles
+        :param offset optional, used when user does not know the timezone and need to adjust time manually
+        """
+
         self.city_name = city_name
         self.unit = unit
         self.output_type = output_type
+        self.timezone = timezone
+        self.offset = offset
+
+        # print self.offset
 
     def get_api_url(self):
         city_name = self.city_name.replace(' ', '%20')
@@ -24,20 +36,32 @@ class CurrentWeather(object):
         return get_api_data(self.get_api_url())
 
     def get_weather(self):
-        return data_organizer(self.get_data(), self.output_type)
+        return data_organizer(self.get_data(), self.output_type, timezone=self.timezone, offset=self.offset)
 
     def report_weather(self):
-        weather_dict = data_organizer(self.get_data(), 'dict')
-        return weather_reporter(weather_dict)
+        weather_dict = data_organizer(self.get_data(), 'dict', timezone=self.timezone, offset=self.offset)
+        return weather_reporter(weather_dict, self.unit)
+
+
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Generate weather report from Openweathermap API')
-    parser.add_argument('city_name', nargs='?', type=str, default='san francisco, us')
-    parser.add_argument('unit', nargs='?', type=str, default='imperial')
-    parser.add_argument('output_type', nargs='?', type=str, default='dict')
+    parser = argparse.ArgumentParser(description='Generate current weather report from Openweathermap API')
+
+    parser.add_argument('city_name', nargs='?', type=str, default='san francisco, us',
+                        help='city name with the format like city,country')
+    parser.add_argument('-c', dest='unit', nargs='?', const='metric', default='imperial',
+                        help='unit of metrics, optional for Celsius and m/s. Default is Fahrenheit and mph')
+    parser.add_argument('-o', dest='offset', nargs='?', type=int, const=0, default=0,
+                        help='hour offset from the Pacific time')
+    parser.add_argument('-tz', dest='timezone', nargs='?', type=str, const='America/Los_Angeles', default='America/Los_Angeles',
+                        help='time zone in pytz module, default as Pacific Time')
 
     args = parser.parse_args()
 
-    city_weather = CurrentWeather(args.city_name, args.unit, args.output_type)
+    city_weather = CurrentWeather(city_name=args.city_name,
+                                  unit=args.unit,
+                                  timezone=args.timezone,
+                                  offset=args.offset)
+
     print city_weather.report_weather()
