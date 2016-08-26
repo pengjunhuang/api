@@ -4,6 +4,7 @@ from config import global_settings
 from utils.api_utils import get_api_data
 from utils.data_utils import data_organizer, weather_reporter
 
+
 class CurrentWeather(object):
     user_api = global_settings.get('user_api')
     api_main = global_settings.get('api_main')
@@ -11,11 +12,11 @@ class CurrentWeather(object):
     def __init__(self, city_name, unit='imperial', output_type='dict', timezone='America/Los_Angeles', offset=0):
         """
 
-        :param city name, e.g. sanfrancisco,us
+        :param city_name, e.g. sanfrancisco,us
         :param unit, imperial for Fahrenheit, metric for Celsius, default is Kelvin
-        :param output_type: choices of dict and pd (or pandas)
-        :param timezone time zone default is America/Los_Angeles
-        :param offset optional, used when user does not know the timezone and need to adjust time manually
+        :param output_type, choices of dict and pd (or pandas)
+        :param timezone, time zone default is America/Los_Angeles
+        :param offset, optional, used when user does not know the timezone and need to adjust time manually
         """
 
         self.city_name = city_name
@@ -23,8 +24,6 @@ class CurrentWeather(object):
         self.output_type = output_type
         self.timezone = timezone
         self.offset = offset
-
-        # print self.offset
 
     def get_api_url(self):
         city_name = self.city_name.replace(' ', '%20')
@@ -41,7 +40,6 @@ class CurrentWeather(object):
     def report_weather(self):
         weather_dict = data_organizer(self.get_data(), 'dict', timezone=self.timezone, offset=self.offset)
         return weather_reporter(weather_dict, self.unit)
-
 
 
 if __name__ == '__main__':
